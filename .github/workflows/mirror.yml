@@ -6,8 +6,7 @@ permissions:
 on:
   push:
     branches:
-      - main
-      - master
+      - '**'
 
   workflow_dispatch:
 
@@ -21,17 +20,32 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Get Branch Name
+        id: branch
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      # GitLab
       - name: Push to GitLab
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/MengYYY369/my_verifier.git
-          git push --mirror gitlab
+          git push gitlab HEAD:${{ steps.branch.outputs.branch }}
+          git push --tags gitlab
 
+      # Gitee
       - name: Push to Gitee
         run: |
           git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/MengYYY666/My_Verifier.git
-          git push --mirror gitee
+          git push gitee HEAD:${{ steps.branch.outputs.branch }}
+          git push --tags gitee
 
+      # GitCode
       - name: Push to GitCode
         run: |
           git remote add gitcode https://${{ secrets.GITCODE_TOKEN }}@gitcode.com/2301_76858796/My_Verifier.git
-          git push --mirror gitcode
+          git push gitcode HEAD:${{ steps.branch.outputs.branch }}
+          git push --tags gitcode
