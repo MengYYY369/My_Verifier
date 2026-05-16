@@ -33,8 +33,8 @@ jobs:
       - name: Push to GitLab
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/MengYYY369/my_verifier.git
-          git push gitlab HEAD:${{ steps.branch.outputs.branch }}
-          git push --tags gitlab
+          git push --force gitlab HEAD:${{ steps.branch.outputs.branch }}
+          git push --force --tags gitlab
 
       # Gitee
       - name: Push to Gitee
