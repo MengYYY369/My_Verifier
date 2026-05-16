@@ -46,6 +46,6 @@ jobs:
       # GitCode
       - name: Push to GitCode
         run: |
-          git remote add gitcode https://${{ secrets.GITCODE_TOKEN }}@gitcode.com/2301_76858796/My_Verifier.git
+          git remote add gitcode https://2301_76858796:${{ secrets.GITCODE_TOKEN }}@gitcode.com/2301_76858796/My_Verifier.git
           git push gitcode HEAD:${{ steps.branch.outputs.branch }}
           git push --tags gitcode
