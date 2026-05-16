@@ -20,15 +20,15 @@ jobs:
 
       - name: Push to GitLab
         run: |
-          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/YOUR_GITLAB_USERNAME/YOUR_REPO.git
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/MengYYY369/my_verifier.git
           git push --mirror gitlab
 
       - name: Push to Gitee
         run: |
-          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/YOUR_GITEE_USERNAME/YOUR_REPO.git
+          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/MengYYY666/My_Verifier.git
           git push --mirror gitee
 
       - name: Push to GitCode
         run: |
-          git remote add gitcode https://${{ secrets.GITCODE_TOKEN }}@gitcode.com/YOUR_GITCODE_USERNAME/YOUR_REPO.git
+          git remote add gitcode https://${{ secrets.GITCODE_TOKEN }}@gitcode.com/2301_76858796/My_Verifier.git
           git push --mirror gitcode
