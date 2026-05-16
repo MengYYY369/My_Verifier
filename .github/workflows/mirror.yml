@@ -39,7 +39,7 @@ jobs:
       # Gitee
       - name: Push to Gitee
         run: |
-          git remote add gitee https://${{ secrets.GITEE_TOKEN }}@gitee.com/MengYYY666/My_Verifier.git
+          git remote add gitee https://MengYYY666:${{ secrets.GITEE_TOKEN }}@gitee.com/MengYYY666/My_Verifier.git
           git push gitee HEAD:${{ steps.branch.outputs.branch }}
           git push --tags gitee
 
