@@ -43,7 +43,7 @@ if ($status) {
 
     Write-Host "`n===== COMMIT =====" -ForegroundColor Yellow
 
-    $msg = Read-Host "Enter commit message (default: 同步)"
+     $msg = "" # Read-Host "Enter commit message (default: 同步)"
 
     if (-not $msg) {
         $msg = "同步"
