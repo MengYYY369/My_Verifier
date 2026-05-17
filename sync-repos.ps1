@@ -1,37 +1,22 @@
-# powershell -ExecutionPolicy Bypass -File .\sync-repos.ps1
-# ===== CONFIG =====
-setx GITCODE_TOKEN "szyxgyFEqNZ1CJTY6myfxntA"
+# .\sync-repos.ps1
+# =========================
+# CONFIG
+# =========================
 
-$repoPaths = @{
+$repos = @{
     github  = "https://github.com/MengYYY369/My_Verifier.git"
     gitlab  = "https://gitlab.com/MengYYY369/my_verifier.git"
     gitee   = "https://gitee.com/MengYYY666/My_Verifier.git"
-    gitcode = "https://2301_76858796:$env:GITCODE_TOKEN@gitcode.com/2301_76858796/My_Verifier.git"
+    gitcode = "git@gitcode.com:2301_76858796/My_Verifier.git"  # SSH ONLY
 }
 
-# ===== FUNCTIONS =====
-function Run-Git($cmd) {
-    Write-Host "`n>> $cmd" -ForegroundColor Cyan
-    iex $cmd
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "FAILED: $cmd" -ForegroundColor Red
-    }
-}
+# =========================
+# CHECK GIT
+# =========================
 
-function Push-Repo($name, $url, $branch) {
-    Write-Host "`n===== PUSH TO $name =====" -ForegroundColor Yellow
-
-    git remote remove $name 2>$null
-    git remote add $name $url
-
-    Run-Git "git push $name $branch"
-    Run-Git "git push --tags $name"
-}
-
-# ===== CHECK GIT =====
-git --version | Out-Null
+git --version > $null 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Git is not installed!" -ForegroundColor Red
+    Write-Host "Git not installed" -ForegroundColor Red
     exit 1
 }
 
@@ -39,33 +24,78 @@ Write-Host "`n===== START SYNC =====" -ForegroundColor Green
 
 # 当前分支
 $branch = git rev-parse --abbrev-ref HEAD
-Write-Host "Current branch: $branch"
+Write-Host "Branch: $branch"
 
-# ===== 1. ADD ALL CHANGES =====
-Write-Host "`n===== STAGING CHANGES =====" -ForegroundColor Yellow
-Run-Git "git add -A"
+# =========================
+# STAGE FILES
+# =========================
 
-# ===== 2. AUTO COMMIT =====
+Write-Host "`n===== STAGING FILES =====" -ForegroundColor Yellow
+git add -A
+
+# =========================
+# COMMIT (AUTO = "同步")
+# =========================
+
 $status = git status --porcelain
 
 if ($status) {
-    $message = Read-Host "Enter commit message"
 
-    if (-not $message) {
-        $message = "auto commit $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    Write-Host "`n===== COMMIT =====" -ForegroundColor Yellow
+
+    $msg = Read-Host "Enter commit message (default: 同步)"
+
+    if (-not $msg) {
+        $msg = "同步"
     }
 
-    Run-Git "git commit -m `"$message`""
+    git commit -m "$msg"
+
 } else {
     Write-Host "No changes to commit." -ForegroundColor Green
 }
 
-# ===== 3. PUSH TO ALL REMOTES =====
-Write-Host "`n===== PUSHING TO REMOTES =====" -ForegroundColor Green
+# =========================
+# PUSH FUNCTION
+# =========================
 
-Push-Repo "github"  $repoPaths.github  $branch
-Push-Repo "gitlab"  $repoPaths.gitlab  $branch
-Push-Repo "gitee"   $repoPaths.gitee   $branch
-Push-Repo "gitcode" $repoPaths.gitcode $branch
+function Push-Repo($name, $url, $branch) {
 
-Write-Host "`n===== ALL DONE =====" -ForegroundColor Green
+    Write-Host "`n===== PUSH TO $name =====" -ForegroundColor Cyan
+
+    git remote remove $name 2>$null
+    git remote add $name $url
+
+    $success = $false
+
+    for ($i = 1; $i -le 3; $i++) {
+
+        Write-Host "Attempt $i..."
+
+        git push $name $branch
+        if ($LASTEXITCODE -eq 0) {
+            $success = $true
+            break
+        }
+
+        Write-Host "Retrying in 5s..." -ForegroundColor DarkYellow
+        Start-Sleep -Seconds 5
+    }
+
+    if (-not $success) {
+        Write-Host "$name push failed after retries" -ForegroundColor Red
+    }
+
+    git push --tags $name 2>$null
+}
+
+# =========================
+# EXECUTION
+# =========================
+
+Push-Repo "github"  $repos.github  $branch
+Push-Repo "gitlab"  $repos.gitlab  $branch
+Push-Repo "gitee"   $repos.gitee   $branch
+Push-Repo "gitcode" $repos.gitcode $branch
+
+Write-Host "`n===== SYNC DONE =====" -ForegroundColor Green
