@@ -31,21 +31,45 @@ jobs:
 
       # GitLab
       - name: Push to GitLab
+        continue-on-error: true
         run: |
+          git remote remove gitlab || true
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/MengYYY369/my_verifier.git
-          git push --force gitlab HEAD:${{ steps.branch.outputs.branch }}
-          git push --force --tags gitlab
+
+          for i in 1 2 3; do
+            git push gitlab HEAD:${{ steps.branch.outputs.branch }} && break
+            echo "GitLab retry $i failed, retrying in 10 seconds..."
+            sleep 10
+          done
+
+          git push --tags gitlab
 
       # Gitee
       - name: Push to Gitee
+        continue-on-error: true
         run: |
+          git remote remove gitee || true
           git remote add gitee https://MengYYY666:${{ secrets.GITEE_TOKEN }}@gitee.com/MengYYY666/My_Verifier.git
-          git push gitee HEAD:${{ steps.branch.outputs.branch }}
+
+          for i in 1 2 3; do
+            git push gitee HEAD:${{ steps.branch.outputs.branch }} && break
+            echo "Gitee retry $i failed, retrying in 10 seconds..."
+            sleep 10
+          done
+
           git push --tags gitee
 
       # GitCode
       - name: Push to GitCode
+        continue-on-error: true
         run: |
+          git remote remove gitcode || true
           git remote add gitcode https://2301_76858796:${{ secrets.GITCODE_TOKEN }}@gitcode.com/2301_76858796/My_Verifier.git
-          git push gitcode HEAD:${{ steps.branch.outputs.branch }}
+
+          for i in 1 2 3; do
+            git push gitcode HEAD:${{ steps.branch.outputs.branch }} && break
+            echo "GitCode retry $i failed, retrying in 10 seconds..."
+            sleep 10
+          done
+
           git push --tags gitcode
